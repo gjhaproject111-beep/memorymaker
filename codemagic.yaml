@@ -1,0 +1,62 @@
+workflows:
+  android-release:
+    name: Photographic Memory — Android
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      vars:
+        # Configure these as encrypted group variables in the Codemagic UI —
+        # never commit real signing secrets to the repository.
+        # CM_KEYSTORE / CM_KEYSTORE_PASSWORD / CM_KEY_ALIAS / CM_KEY_PASSWORD
+        PACKAGE_NAME: "com.example.photographic_memory"
+      groups:
+        - android_signing # define this group in Codemagic with the vars above
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Ensure Android platform folder exists
+        script: |
+          # This repo ships lib/, test/, and pubspec.yaml only. The android/
+          # folder (Gradle files, manifest, etc.) is generated once — either
+          # by you locally (see README "First-time setup") and committed, or
+          # here, on the fly, if it hasn't been committed yet.
+          if [ ! -d android ]; then
+            flutter create --platforms=android --project-name photographic_memory .
+          fi
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Static analysis
+        script: flutter analyze
+      - name: Run tests
+        script: flutter test
+      - name: Set up local signing properties (only if secrets are present)
+        script: |
+          if [ -n "$CM_KEYSTORE" ]; then
+            echo $CM_KEYSTORE | base64 --decode > $CM_BUILD_DIR/android/app/keystore.jks
+            cat > $CM_BUILD_DIR/android/key.properties <<PROPS
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=keystore.jks
+          PROPS
+          fi
+      - name: Build APK
+        script: flutter build apk --release
+      - name: Build AAB
+        script: flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true

@@ -1,0 +1,36 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.g.dart.bak
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Android
+android/.gradle/
+android/local.properties
+android/**/gradle-wrapper.jar
+android/key.properties
+*.jks
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# macOS
+.DS_Store
+
+# Coverage
+coverage/
+
+# Secrets — never commit
+**/secrets.dart
+*.env
