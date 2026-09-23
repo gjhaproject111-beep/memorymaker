@@ -16,7 +16,7 @@ class TrendLineChart extends StatelessWidget {
   const TrendLineChart({
     super.key,
     required this.values,
-    required this.labels,
+    this.labels = const [],,
     this.height = 160,
     this.color = AppColors.peach,
     this.valueFormat,
