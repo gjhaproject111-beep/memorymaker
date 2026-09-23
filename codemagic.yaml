@@ -27,6 +27,7 @@ workflows:
           # here, on the fly, if it hasn't been committed yet.
           if [ ! -d android ]; then
             flutter create --platforms=android --project-name photographic_memory .
+            rm -f test/widget_test.dart
           fi
       - name: Get Flutter packages
         script: flutter packages pub get
