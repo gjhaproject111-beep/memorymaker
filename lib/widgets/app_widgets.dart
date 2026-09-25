@@ -2,6 +2,7 @@ import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
 
+import '../core/models/enums.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text_styles.dart';
 
@@ -15,7 +16,7 @@ class GradientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(gradient: AppColors.plumBackground),
+      decoration: const BoxDecoration(color: AppColors.background),
       child: child,
     );
   }
@@ -40,7 +41,7 @@ class SectionHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: AppTextStyles.h2),
+        Expanded(child: Text(title, style: AppTextStyles.h2, overflow: TextOverflow.ellipsis)),
         if (trailing != null) trailing!,
       ],
     );
@@ -69,7 +70,7 @@ class PrimaryButton extends StatelessWidget {
         ? const SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.deepPlum),
+            child: CircularProgressIndicator(strokeWidth: 2.2, color: AppColors.darkButtonText),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -78,7 +79,7 @@ class PrimaryButton extends StatelessWidget {
               Flexible(child: Text(label, style: AppTextStyles.buttonLabel, overflow: TextOverflow.ellipsis)),
               if (trailingIcon != null) ...[
                 const SizedBox(width: 8),
-                Icon(trailingIcon, size: 18, color: AppColors.deepPlum),
+                Icon(trailingIcon, size: 18, color: AppColors.darkButtonText),
               ],
             ],
           );
@@ -104,7 +105,8 @@ class SecondaryButton extends StatelessWidget {
 }
 
 /// A circular accuracy indicator — the app's signature visual, used on
-/// Home, Results, and Mastery screens.
+/// Home, Results, and Mastery screens. Peach is the right accent here: a
+/// key metric highlight is exactly what the design system reserves it for.
 class AccuracyRing extends StatelessWidget {
   final double value; // 0..1
   final double size;
@@ -118,7 +120,7 @@ class AccuracyRing extends StatelessWidget {
     this.size = 140,
     this.strokeFraction = 0.09,
     this.center,
-    this.color = AppColors.peach,
+    this.color = AppColors.peachAccent,
   });
 
   @override
@@ -145,7 +147,7 @@ class _RingPainter extends CustomPainter {
     final stroke = size.width * strokeFraction;
     final rect = Rect.fromLTWH(stroke / 2, stroke / 2, size.width - stroke, size.height - stroke);
     final bgPaint = Paint()
-      ..color = AppColors.plumBorder
+      ..color = AppColors.border
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
@@ -187,7 +189,7 @@ class TrendChip extends StatelessWidget {
     final text = isPercentagePoints ? '$sign${(delta * 100).round()}%' : '$sign${delta.toStringAsFixed(1)}';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: color.withOpacity(0.16), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
       child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700)),
     );
   }
@@ -216,14 +218,15 @@ class StatTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: AppTextStyles.caption),
+          Text(label, style: AppTextStyles.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.end,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(value, style: AppTextStyles.statNumber),
-              if (delta != null) ...[
-                const SizedBox(width: 8),
+              if (delta != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: TrendChip(
@@ -232,7 +235,6 @@ class StatTile extends StatelessWidget {
                     isPercentagePoints: deltaIsPercentagePoints,
                   ),
                 ),
-              ],
             ],
           ),
         ],
@@ -241,20 +243,36 @@ class StatTile extends StatelessWidget {
   }
 }
 
+/// A difficulty badge, color-coded the way the reference design shows:
+/// green for Easy, peach/orange for Medium, red for Hard, purple for
+/// Advanced — a small extra touch of legibility over a single flat color.
 class DifficultyPill extends StatelessWidget {
-  final String label;
-  const DifficultyPill({super.key, required this.label});
+  final PassageDifficulty difficulty;
+  const DifficultyPill({super.key, required this.difficulty});
+
+  Color get _color {
+    switch (difficulty) {
+      case PassageDifficulty.easy:
+        return AppColors.difficultyEasy;
+      case PassageDifficulty.medium:
+        return AppColors.difficultyMedium;
+      case PassageDifficulty.hard:
+        return AppColors.difficultyHard;
+      case PassageDifficulty.advanced:
+        return AppColors.difficultyAdvanced;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = _color;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.mutedRose.withOpacity(0.18),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.mutedRose.withOpacity(0.4)),
       ),
-      child: Text(label, style: const TextStyle(color: AppColors.mutedRose, fontSize: 11, fontWeight: FontWeight.w700)),
+      child: Text(difficulty.label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
     );
   }
 }
@@ -285,5 +303,5 @@ class EmptyState extends StatelessWidget {
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override
-  Widget build(BuildContext context) => const Center(child: CircularProgressIndicator(color: AppColors.peach));
+  Widget build(BuildContext context) => const Center(child: CircularProgressIndicator(color: AppColors.primaryDark));
 }

@@ -22,13 +22,13 @@ class StepHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 12,
-                backgroundColor: active ? AppColors.peach : AppColors.plumBorder,
+                backgroundColor: active ? AppColors.peachAccent : AppColors.border,
                 child: Text(
                   '${i + 1}',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: active ? AppColors.deepPlum : AppColors.textMuted,
+                    color: active ? AppColors.primaryDark : AppColors.textMuted,
                   ),
                 ),
               ),
@@ -39,7 +39,7 @@ class StepHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                    color: active ? AppColors.peach : AppColors.textMuted,
+                    color: active ? AppColors.primaryDark : AppColors.textMuted,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

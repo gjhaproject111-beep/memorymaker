@@ -55,36 +55,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     Text('Settings', style: AppTextStyles.h1),
                     const SizedBox(height: 20),
-                    _sectionCard('Training Options', [
+                    _sectionCard('Training', Icons.bolt, [
                       _lengthRow(settings),
                       const Divider(height: 26),
                       _difficultyRow(settings),
                       const Divider(height: 26),
                       _masteryRow(settings),
                       const Divider(height: 26),
-                      _switchRow('Reading timer', settings.readingTimerEnabled,
-                          (v) => _update((s) => s.readingTimerEnabled = v)),
-                      _switchRow('Recall timer', settings.recallTimerEnabled,
-                          (v) => _update((s) => s.recallTimerEnabled = v)),
                       _switchRow('Show corrections immediately', settings.showCorrectionsImmediately,
                           (v) => _update((s) => s.showCorrectionsImmediately = v)),
                       _switchRow('Require exact punctuation', settings.requireExactPunctuation,
                           (v) => _update((s) => s.requireExactPunctuation = v)),
                     ]),
                     const SizedBox(height: 16),
-                    _sectionCard('Retention Schedule', [_retentionRow(settings)]),
+                    _sectionCard('Timing', Icons.timer, [
+                      _switchRow('Reading timer', settings.readingTimerEnabled,
+                          (v) => _update((s) => s.readingTimerEnabled = v)),
+                      _switchRow('Recall timer', settings.recallTimerEnabled,
+                          (v) => _update((s) => s.recallTimerEnabled = v)),
+                    ]),
                     const SizedBox(height: 16),
-                    _sectionCard('Sound', [
+                    _sectionCard('Retention Schedule', Icons.alarm, [_retentionRow(settings)]),
+                    const SizedBox(height: 16),
+                    _sectionCard('Sound', Icons.volume_up, [
                       _switchRow('Sound effects', settings.soundEnabled, (v) => _update((s) => s.soundEnabled = v)),
                     ]),
                     const SizedBox(height: 16),
-                    _sectionCard('Appearance', [
-                      _row('Theme', const Text('Plum & Peach', style: AppTextStyles.bodySecondary)),
+                    _sectionCard('Appearance', Icons.palette_outlined, [
+                      _row('Theme', const Text('Light & Peach', style: AppTextStyles.bodySecondary)),
                       const Divider(height: 26),
                       _fontSizeRow(settings),
                     ]),
                     const SizedBox(height: 16),
-                    _sectionCard('Data', [
+                    _sectionCard('Data', Icons.storage, [
                       _dataButton('Export backup', Icons.file_download, () async {
                         await Services.backup.exportBackup();
                         if (!mounted) return;
@@ -114,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.plumCard,
+        backgroundColor: AppColors.surface,
         title: const Text('Reset all progress?'),
         content: const Text(
           'This permanently deletes every session, attempt, and mastery record. Passages themselves are unaffected. This cannot be undone.',
@@ -136,12 +139,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Widget _sectionCard(String title, List<Widget> children) {
+  Widget _sectionCard(String title, IconData icon, List<Widget> children) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.h3),
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(9)),
+                child: Icon(icon, size: 16, color: AppColors.primaryDark),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text(title, style: AppTextStyles.h3, overflow: TextOverflow.ellipsis)),
+            ],
+          ),
           const SizedBox(height: 14),
           ...children,
         ],
@@ -152,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _row(String label, Widget trailing) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [Text(label, style: AppTextStyles.body), trailing],
+      children: [Expanded(child: Text(label, style: AppTextStyles.body)), trailing],
     );
   }
 
@@ -178,10 +192,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: Text('$len'),
               selected: selected,
               onSelected: (_) => _update((s) => s.defaultPassageLength = len),
-              selectedColor: AppColors.peach.withOpacity(0.25),
-              labelStyle: TextStyle(color: selected ? AppColors.peach : AppColors.textSecondary),
-              backgroundColor: AppColors.darkPlum,
-              side: BorderSide(color: selected ? AppColors.peach : AppColors.plumBorder),
+              selectedColor: AppColors.primaryDark,
+              labelStyle: TextStyle(color: selected ? AppColors.darkButtonText : AppColors.textSecondary),
+              backgroundColor: AppColors.background,
+              side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+              showCheckmark: false,
             );
           }).toList(),
         ),
@@ -204,10 +219,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: Text(d.label),
               selected: selected,
               onSelected: (_) => _update((s) => s.defaultDifficulty = d),
-              selectedColor: AppColors.peach.withOpacity(0.25),
-              labelStyle: TextStyle(color: selected ? AppColors.peach : AppColors.textSecondary),
-              backgroundColor: AppColors.darkPlum,
-              side: BorderSide(color: selected ? AppColors.peach : AppColors.plumBorder),
+              selectedColor: AppColors.primaryDark,
+              labelStyle: TextStyle(color: selected ? AppColors.darkButtonText : AppColors.textSecondary),
+              backgroundColor: AppColors.background,
+              side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+              showCheckmark: false,
             );
           }).toList(),
         ),
@@ -225,8 +241,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           min: 0.90,
           max: 1.0,
           divisions: 10,
-          activeColor: AppColors.peach,
-          inactiveColor: AppColors.plumBorder,
           onChanged: (v) => _update((s) => s.masteryThreshold = v),
         ),
       ],
@@ -249,10 +263,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               s.retentionIntervals.remove(interval);
             }
           }),
-          selectedColor: AppColors.info.withOpacity(0.25),
-          labelStyle: TextStyle(color: selected ? AppColors.info : AppColors.textSecondary),
-          backgroundColor: AppColors.darkPlum,
-          side: BorderSide(color: selected ? AppColors.info : AppColors.plumBorder),
+          selectedColor: AppColors.primaryDark,
+          labelStyle: TextStyle(color: selected ? AppColors.darkButtonText : AppColors.textSecondary),
+          backgroundColor: AppColors.background,
+          side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+          showCheckmark: false,
         );
       }).toList(),
     );
@@ -273,10 +288,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               label: Text(e.key),
               selected: selected,
               onSelected: (_) => _update((s) => s.fontScale = e.value),
-              selectedColor: AppColors.peach.withOpacity(0.25),
-              labelStyle: TextStyle(color: selected ? AppColors.peach : AppColors.textSecondary),
-              backgroundColor: AppColors.darkPlum,
-              side: BorderSide(color: selected ? AppColors.peach : AppColors.plumBorder),
+              selectedColor: AppColors.primaryDark,
+              labelStyle: TextStyle(color: selected ? AppColors.darkButtonText : AppColors.textSecondary),
+              backgroundColor: AppColors.background,
+              side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+              showCheckmark: false,
             );
           }).toList(),
         ),
@@ -295,7 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Icon(icon, size: 20, color: color),
             const SizedBox(width: 12),
-            Text(label, style: AppTextStyles.body.copyWith(color: color)),
+            Expanded(child: Text(label, style: AppTextStyles.body.copyWith(color: color))),
           ],
         ),
       ),

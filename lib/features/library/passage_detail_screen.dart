@@ -36,7 +36,7 @@ class PassageDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(children: [
-                      DifficultyPill(label: passage.difficulty.label),
+                      DifficultyPill(difficulty: passage.difficulty),
                       const SizedBox(width: 8),
                       Text(passage.category.label, style: AppTextStyles.caption),
                       const Spacer(),

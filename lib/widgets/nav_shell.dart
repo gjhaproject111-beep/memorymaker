@@ -18,7 +18,8 @@ class _Destination {
 
 /// The app's persistent shell: a bottom navigation bar on phones, a side
 /// rail on wider screens (tablet / desktop / web), wrapping the six
-/// top-level sections.
+/// top-level sections. Deliberately monochrome — selection is shown by
+/// icon/label weight and color alone, with no filled indicator capsule.
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
 
@@ -48,20 +49,19 @@ class _RootShellState extends State<RootShell> {
 
     if (isWide) {
       return Scaffold(
-        backgroundColor: AppColors.deepPlum,
+        backgroundColor: AppColors.background,
         body: Row(
           children: [
             NavigationRail(
-              backgroundColor: AppColors.darkPlum,
+              backgroundColor: AppColors.surface,
               selectedIndex: _index,
               onDestinationSelected: (i) => setState(() => _index = i),
               labelType: NavigationRailLabelType.all,
-              useIndicator: true,
-              indicatorColor: AppColors.peach.withOpacity(0.18),
-              selectedIconTheme: const IconThemeData(color: AppColors.peach),
+              useIndicator: false,
+              selectedIconTheme: const IconThemeData(color: AppColors.primaryDark),
               unselectedIconTheme: const IconThemeData(color: AppColors.textMuted),
-              selectedLabelTextStyle: const TextStyle(color: AppColors.peach, fontWeight: FontWeight.w600),
-              unselectedLabelTextStyle: const TextStyle(color: AppColors.textMuted),
+              selectedLabelTextStyle: const TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.w700),
+              unselectedLabelTextStyle: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w500),
               destinations: _destinations
                   .map((d) => NavigationRailDestination(
                         icon: Icon(d.icon),
@@ -70,7 +70,7 @@ class _RootShellState extends State<RootShell> {
                       ))
                   .toList(),
             ),
-            const VerticalDivider(width: 1, color: AppColors.plumBorder),
+            const VerticalDivider(width: 1, thickness: 1, color: AppColors.border),
             Expanded(child: body),
           ],
         ),
@@ -78,31 +78,39 @@ class _RootShellState extends State<RootShell> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.deepPlum,
+      backgroundColor: AppColors.background,
       body: body,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: AppColors.darkPlum,
-          indicatorColor: AppColors.peach.withOpacity(0.18),
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            final selected = states.contains(WidgetState.selected);
-            return TextStyle(
-              fontSize: 11,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? AppColors.peach : AppColors.textMuted,
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            final selected = states.contains(WidgetState.selected);
-            return IconThemeData(color: selected ? AppColors.peach : AppColors.textMuted);
-          }),
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         ),
-        child: NavigationBar(
-          selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
-          destinations: _destinations
-              .map((d) => NavigationDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selectedIcon), label: d.label))
-              .toList(),
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            backgroundColor: Colors.transparent,
+            indicatorColor: Colors.transparent,
+            height: 64,
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? AppColors.primaryDark : AppColors.textMuted,
+              );
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return IconThemeData(color: selected ? AppColors.primaryDark : AppColors.textMuted, size: 24);
+            }),
+          ),
+          child: NavigationBar(
+            selectedIndex: _index,
+            onDestinationSelected: (i) => setState(() => _index = i),
+            elevation: 0,
+            destinations: _destinations
+                .map((d) => NavigationDestination(icon: Icon(d.icon), selectedIcon: Icon(d.selectedIcon), label: d.label))
+                .toList(),
+          ),
         ),
       ),
     );

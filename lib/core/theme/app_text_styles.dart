@@ -67,7 +67,7 @@ class AppTextStyles {
   static const TextStyle passageReading = TextStyle(
     fontSize: 19,
     fontWeight: FontWeight.w400,
-    color: AppColors.deepPlum,
+    color: AppColors.textPrimary,
     height: 1.7,
     letterSpacing: 0.1,
   );
@@ -75,6 +75,6 @@ class AppTextStyles {
   static const TextStyle buttonLabel = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppColors.deepPlum,
+    color: AppColors.darkButtonText,
   );
 }

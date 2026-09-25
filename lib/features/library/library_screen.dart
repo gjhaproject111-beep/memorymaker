@@ -30,17 +30,23 @@ class LibraryScreen extends StatefulWidget {
 class _LibraryScreenState extends State<LibraryScreen> {
   late Future<List<_LibraryEntry>> _future;
   PassageCategory? _filter;
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
 
   @override
   void initState() {
     super.initState();
     _future = _load();
     AppDataBus.instance.addListener(_refresh);
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
   }
 
   @override
   void dispose() {
     AppDataBus.instance.removeListener(_refresh);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -77,12 +83,42 @@ class _LibraryScreenState extends State<LibraryScreen> {
             if (!snapshot.hasData) return const LoadingView();
             var entries = snapshot.data!;
             if (_filter != null) entries = entries.where((e) => e.passage.category == _filter).toList();
+            if (_query.isNotEmpty) {
+              entries = entries.where((e) => e.passage.title.toLowerCase().contains(_query)).toList();
+            }
             return Column(
               children: [
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 12),
                   child: Row(children: [Expanded(child: Text('Library', style: AppTextStyles.h1))]),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextField(
+                    controller: _searchController,
+                    style: AppTextStyles.body,
+                    decoration: InputDecoration(
+                      hintText: 'Search passages...',
+                      prefixIcon: const Icon(Icons.search, color: AppColors.textMuted, size: 20),
+                      suffixIcon: _query.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.close, color: AppColors.textMuted, size: 18),
+                              onPressed: () => _searchController.clear(),
+                            ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SingleChildScrollView(
@@ -98,8 +134,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 const SizedBox(height: 4),
                 Expanded(
                   child: entries.isEmpty
-                      ? const EmptyState(
-                          icon: Icons.menu_book, title: 'No passages', message: 'Nothing in this category yet.')
+                      ? EmptyState(
+                          icon: Icons.menu_book,
+                          title: 'No passages',
+                          message: _query.isNotEmpty ? 'No titles match "$_query".' : 'Nothing in this category yet.',
+                        )
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                           itemCount: entries.length,
@@ -123,11 +162,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
         label: Text(label),
         selected: selected,
         onSelected: (_) => setState(() => _filter = category),
-        selectedColor: AppColors.peach.withOpacity(0.25),
-        labelStyle:
-            TextStyle(color: selected ? AppColors.peach : AppColors.textSecondary, fontWeight: FontWeight.w600),
-        backgroundColor: AppColors.darkPlum,
-        side: BorderSide(color: selected ? AppColors.peach : AppColors.plumBorder),
+        selectedColor: AppColors.primaryDark,
+        labelStyle: TextStyle(
+          color: selected ? AppColors.darkButtonText : AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+        backgroundColor: AppColors.surface,
+        side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+        showCheckmark: false,
       ),
     );
   }
@@ -148,22 +190,26 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(entry.passage.title, style: AppTextStyles.h3),
+                  Text(entry.passage.title, style: AppTextStyles.h3, maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 6),
                   Row(children: [
-                    Text(entry.passage.category.label, style: AppTextStyles.caption),
+                    Flexible(child: Text(entry.passage.category.label, style: AppTextStyles.caption, overflow: TextOverflow.ellipsis)),
                     const SizedBox(width: 10),
                     Text('${entry.passage.wordCount} words', style: AppTextStyles.caption),
                   ]),
                   const SizedBox(height: 10),
-                  Row(children: [
-                    DifficultyPill(label: entry.passage.difficulty.label),
-                    const SizedBox(width: 8),
-                    _statusPill(entry),
-                  ]),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      DifficultyPill(difficulty: entry.passage.difficulty),
+                      _statusPill(entry),
+                    ],
+                  ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: AppColors.textMuted),
           ],
         ),
@@ -179,14 +225,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
       color = AppColors.success;
     } else if (entry.isInProgress) {
       label = 'In progress';
-      color = AppColors.peach;
+      color = AppColors.peachAccent;
     } else {
       label = 'Unseen';
       color = AppColors.textMuted;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: color.withOpacity(0.14), borderRadius: BorderRadius.circular(20)),
       child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
     );
   }

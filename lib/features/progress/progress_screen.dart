@@ -103,11 +103,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
         label: Text(label),
         selected: selected,
         onSelected: (_) => setState(() => _view = view),
-        selectedColor: AppColors.peach.withOpacity(0.25),
-        labelStyle:
-            TextStyle(color: selected ? AppColors.peach : AppColors.textSecondary, fontWeight: FontWeight.w600),
-        backgroundColor: AppColors.darkPlum,
-        side: BorderSide(color: selected ? AppColors.peach : AppColors.plumBorder),
+        selectedColor: AppColors.primaryDark,
+        labelStyle: TextStyle(
+          color: selected ? AppColors.darkButtonText : AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+        backgroundColor: AppColors.surface,
+        side: BorderSide(color: selected ? AppColors.primaryDark : AppColors.border),
+        showCheckmark: false,
       ),
     );
   }
@@ -132,7 +135,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text('Overall Accuracy', style: AppTextStyles.h3),
               const SizedBox(height: 12),
-              TrendLineChart(values: data.trend.map((s) => s.oneReadAccuracy).toList()),
+              TrendLineChart(
+                values: data.trend.map((s) => s.oneReadAccuracy).toList(),
+                labels: data.trend.map((s) => DateFormatting.shortDate(s.bucketStart)).toList(),
+              ),
             ],
           ),
         ),
@@ -194,7 +200,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 4),
           Text('Accuracy on the very first recall attempt of each passage.', style: AppTextStyles.caption),
           const SizedBox(height: 16),
-          TrendLineChart(values: data.trend.map((s) => s.oneReadAccuracy).toList(), height: 200),
+          TrendLineChart(
+            values: data.trend.map((s) => s.oneReadAccuracy).toList(),
+            labels: data.trend.map((s) => DateFormatting.shortDate(s.bucketStart)).toList(),
+            height: 200,
+          ),
         ],
       ),
     );
@@ -231,6 +241,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 16),
           TrendLineChart(
             values: data.trend.map((s) => s.averageAttemptsToMastery).toList(),
+            labels: data.trend.map((s) => DateFormatting.shortDate(s.bucketStart)).toList(),
             color: AppColors.info,
             valueFormat: (v) => v.toStringAsFixed(1),
           ),

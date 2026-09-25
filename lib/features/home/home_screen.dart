@@ -8,7 +8,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_format.dart';
 import '../../widgets/app_widgets.dart';
+import '../analytics/analytics_screen.dart';
+import '../library/library_screen.dart';
+import '../progress/progress_screen.dart';
 import '../retention/retention_screen.dart';
+import '../settings/settings_screen.dart';
 import '../training/training_flow_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -169,6 +173,47 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  Text('Quick Access', style: AppTextStyles.h3),
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 2.4,
+                    children: [
+                      _quickAccessTile(
+                        icon: Icons.trending_up,
+                        label: 'Progress',
+                        subtitle: 'Track your growth',
+                        onTap: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const ProgressScreen())),
+                      ),
+                      _quickAccessTile(
+                        icon: Icons.bar_chart,
+                        label: 'Analytics',
+                        subtitle: 'See insights',
+                        onTap: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const AnalyticsScreen())),
+                      ),
+                      _quickAccessTile(
+                        icon: Icons.menu_book,
+                        label: 'Library',
+                        subtitle: 'All passages',
+                        onTap: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const LibraryScreen())),
+                      ),
+                      _quickAccessTile(
+                        icon: Icons.settings,
+                        label: 'Settings',
+                        subtitle: 'Personalize',
+                        onTap: () => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                      ),
+                    ],
+                  ),
                   if (data.dueRetentionCount > 0) ...[
                     const SizedBox(height: 20),
                     AppCard(
@@ -236,6 +281,42 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 14),
           PrimaryButton(label: 'Start Training', onPressed: _startTraining, expand: true),
         ],
+      ),
+    );
+  }
+
+  Widget _quickAccessTile({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
+              child: Icon(icon, size: 18, color: AppColors.primaryDark),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(subtitle, style: AppTextStyles.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
